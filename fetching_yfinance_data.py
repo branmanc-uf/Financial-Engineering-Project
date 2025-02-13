@@ -1,10 +1,17 @@
 import yfinance as yf
 import pandas as pd
 
+#Andres comment
+# 1. VScode
+# 2. Python
+# 3. Git
+# 4. GitHub Desktop
+# 5. Git extensions for VSCode
+
 def fetch_data(stock="SPY", interval="1m", period="5d"):
     """
     Fetches 1-minute historical stock data for the last 5 trading days.
-    Ensures each trading day has exactly 390 rows (one per trading minute).
+    Ensures each trading day has exactly 390 rows (one per trading min).
     Returns a dictionary of DataFrames, one for each trading day.
     """
 
