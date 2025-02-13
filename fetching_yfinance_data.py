@@ -5,8 +5,9 @@ import pandas as pd
 # 1. VScode
 # 2. Python
 # 3. Git
-# 4. GitHb Desktop
+# 4. GitHub Desktop
 # 5. Git extensions for VSCode
+#test
 
 def fetch_data(stock="SPY", interval="1m", period="5d"):
     """
