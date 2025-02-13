@@ -6,6 +6,7 @@ import pandas as pd
 # 2. Python
 # 3. Git
 # 5. Git extensions for VSCode
+#test
 
 def fetch_data(stock="SPY", interval="1m", period="5d"):
     """
