@@ -14,8 +14,8 @@ def calculate_orb(df):
     
     print(f"📅 First Trading Day: {df.index[0]}")
 
-    # Calculate the ORB for the first 30 minutes of trading (9:30 to 10:00)
-    open_range = df.between_time('09:30', '10:00')
+    # Calculate the ORB for the first 15 minutes of trading (9:30 to 9:45)
+    open_range = df.between_time('09:30', '9:45')
     print("Open range data:\n", open_range.head())
 
     # Check if 'High' and 'Low' columns exist
@@ -24,14 +24,30 @@ def calculate_orb(df):
         return df
 
     if open_range.empty:
-        print("Warning: No data available for the first 30 minutes of trading.")
+        print("Warning: No data available for the first 15 minutes of trading.")
         return df  # Returning without setting ORB_High/ORB_Low if no data is available
 
     # Debugging: print open_range data
     print("Open range data:\n", open_range)
 
-    orb_high = open_range['High'].max()
-    orb_low = open_range['Low'].min()
+    # Get the first 15 rows of data from the open range data
+    open_range_first_15 = open_range.iloc[:15]
+
+    print(open_range_first_15.head())
+    # Check if 'High' and 'Low' columns exist in the first 15 rows
+
+    # Grab only the 'High' and 'Low' columns
+    high_df = open_range_first_15[['High']]
+    low_df = open_range_first_15[['Low']]
+
+    print("High DataFrame:\n", high_df)
+    print("Low DataFrame:\n", low_df)
+
+    # Find the max from the high_df and min from the low_df
+    orb_high = high_df['High'].max()
+    orb_low = low_df['Low'].min()
+
+    print(f"ORB_High: {orb_high}, \n ORB_Low: {orb_low}")
     
     # Fill the ORB values for the rest of the day
     df['ORB_High'] = orb_high
