@@ -1,120 +1,75 @@
-import datetime
+import yfinance as yf
 import pandas as pd
-import numpy as nppip
-import matplotlib.pyplot as plt
+import numpy as np
 
-# Import the fetch_data function from fetching_yfinance_data.py
-from fetching_yfinance_data import fetch_data
-
-def calculate_indicators(df):
-    """
-    Calculate VWAP and EMA for the given DataFrame.
-    """
-    df['Cumulative Price x Volume'] = (df['Close'] * df['Volume']).cumsum()
-    df['Cumulative Volume'] = df['Volume'].cumsum()
-    df['VWAP'] = df['Cumulative Price x Volume'] / df['Cumulative Volume']
-    
-    ema_period = 8
-    df['EMA'] = df['Close'].ewm(span=ema_period, adjust=False).mean()
-    
+def fetch_data():
+    print("📈 Fetching 1m data for SPY over the past 5d.")
+    df = yf.download('SPY', period='5d', interval='1m')
+    print(f"✅ {df.index.date[-1]} - {len(df)} rows fetched.\n")
     return df
 
-def determine_orb_levels(daily_data):
-    """
-    Determine Open Range Breakout (ORB) levels based on the first 15 minutes (9:30 - 9:45 AM) 
-    for each trading day in `daily_data` dictionary.
-    """
-    for date, df in daily_data.items():
-        # Extract the first 15 rows (first 15 minutes of trading)
-        orb_window = df.iloc[:15].dropna()  # Drop NaN rows to prevent errors
+def calculate_orb(df):
+    # Convert index to local time (assuming NY time zone for SPY)
+    df.index = df.index.tz_convert('America/New_York')
+    
+    print(f"📅 First Trading Day: {df.index[0]}")
 
-        if orb_window.empty:
-            print(f"⚠️ ORB skipped for {date} (missing data).")
-            continue
+    # Calculate the ORB for the first 30 minutes of trading (9:30 to 10:00)
+    open_range = df.between_time('09:30', '10:00')
+    print("Open range data:\n", open_range.head())
 
-        # Calculate ORB levels
-        orb_high = orb_window["High"].max()  # Max high in first 15 minutes
-        orb_low = orb_window["Low"].min()    # Min low in first 15 minutes
+    if open_range.empty:
+        print("Warning: No data available for the first 30 minutes of trading.")
+        return df  # Returning without setting ORB_High/ORB_Low if no data is available
 
-        # Fix misalignment issue (remove "Ticker" label if present)
-        # df["ORB_High"] = orb_high.values[0] if isinstance(orb_high, pd.Series) else orb_high
-        # df["ORB_Low"] = orb_low.values[0] if isinstance(orb_low, pd.Series) else orb_low
-        df["ORB_High"] = orb_high
-        df["ORB_Low"] = orb_low
-        # Print ORB levels for debugging
+    orb_high = open_range['High'].max()
+    orb_low = open_range['Low'].min()
+    
+    # Fill the ORB values for the rest of the day
+    df['ORB_High'] = orb_high
+    df['ORB_Low'] = orb_low
+    
+    # Debugging: print ORB values for review
+    print("ORB_High before fill:\n", df['ORB_High'].head())
+    print("ORB_Low before fill:\n", df['ORB_Low'].head())
 
+    # Fill missing values in ORB_High and ORB_Low with forward fill
+    df[['ORB_High', 'ORB_Low']] = df[['ORB_High', 'ORB_Low']].ffill()
 
-        print(f"📊 ORB for {date}: High = {df['ORB_High'].iloc[0]}, Low = {df['ORB_Low'].iloc[0]}")
+    # Debugging: print ORB values after fill
+    print("ORB_High after fill:\n", df['ORB_High'].head())
+    print("ORB_Low after fill:\n", df['ORB_Low'].head())
 
-    return daily_data
+    return df
 
 def generate_signals(df):
-    """
-    Generate buy/sell signals based on ORB breakout levels.
-    """
-    required_columns = ['Close', 'ORB_High', 'ORB_Low']
+    # Generating buy signals when price crosses above ORB_High
+    df.loc[(df['Close'] > df['ORB_High']) & (df['Close'].shift(1) <= df['ORB_High']), 'Signal'] = 'BUY'
     
-    if df.empty or any(col not in df.columns for col in required_columns):
-        print("❌ ORB levels missing. Cannot generate signals.")
-        df['Signal'] = 0
-        return df
-
-    df = df.copy()  # Prevent chained assignment warnings
-
-    # 🔹 Fix: Fill forward ORB values to match index alignment
-    df['ORB_High'] = df['ORB_High'].ffill()
-    df['ORB_Low'] = df['ORB_Low'].ffill()
-
-    # 🔹 Fix: Explicitly align before comparisons
-    df['Close'], df['ORB_High'] = df['Close'].align(df['ORB_High'], axis=0, copy=False)
-    df['Close'], df['ORB_Low'] = df['Close'].align(df['ORB_Low'], axis=0, copy=False)
-
-    # Generate buy/sell signals
-    df['Signal'] = 0
-    df.loc[(df['Close'] > df['ORB_High']) & (df['Close'].shift(1) <= df['ORB_High']), 'Signal'] = 1
-    df.loc[(df['Close'] < df['ORB_Low']) & (df['Close'].shift(1) >= df['ORB_Low']), 'Signal'] = -1
+    # Generating sell signals when price crosses below ORB_Low
+    df.loc[(df['Close'] < df['ORB_Low']) & (df['Close'].shift(1) >= df['ORB_Low']), 'Signal'] = 'SELL'
 
     return df
 
-def plot_signals(df, stock, date):
-    """
-    Plot the stock price and highlight buy/sell signals.
-    """
-    plt.figure(figsize=(14, 7))
-    plt.plot(df.index, df['Close'], label='Close Price', color='blue', alpha=0.6)
-    
-    # Plot buy signals
-    plt.scatter(df.index[df['Signal'] == 1], df['Close'][df['Signal'] == 1], label='Buy Signal', marker='^', color='green', alpha=1, lw=3)
-
-    # Plot sell signals
-    plt.scatter(df.index[df['Signal'] == -1], df['Close'][df['Signal'] == -1], label='Sell Signal', marker='v', color='red', alpha=1, lw=3)
-
-    plt.title(f'{stock} Price Chart with ORB Signals ({date})')
-    plt.xlabel('Time')
-    plt.ylabel('Price')
-    plt.legend()
-    plt.grid()
-    plt.show()
-
 def main():
-    stock = 'SPY'
-
-    # Fetch Data (now returns a dictionary of DataFrames, one per trading day)
-    daily_data = fetch_data(stock)
-
-    if not daily_data:
-        print("❌ No data fetched. Exiting program.")
+    # Fetching data
+    df = fetch_data()
+    
+    # Calculating ORB values
+    df = calculate_orb(df)
+    
+    # Check if ORB_High and ORB_Low exist before calling dropna
+    if 'ORB_High' in df.columns and 'ORB_Low' in df.columns:
+        df = df.dropna(subset=['ORB_High', 'ORB_Low'])
+    else:
+        print("Error: ORB_High or ORB_Low columns are missing.")
         return
 
-    # Apply ORB Calculation
-    daily_data = determine_orb_levels(daily_data)
+    # Generating signals based on ORB
+    df = generate_signals(df)
 
-    for date, df in daily_data.items():
-        print(f"\n🔍 Processing Data for {date}:")
-        df = calculate_indicators(df)
-        df = generate_signals(df)
-        print(df[['Close', 'VWAP', 'EMA', 'ORB_High', 'ORB_Low', 'Signal']].head(20))
-        plot_signals(df, stock, date)
+    # Printing the signals dataframe
+    print(df[['Close', 'ORB_High', 'ORB_Low', 'Signal']].head())
 
 if __name__ == "__main__":
     main()
