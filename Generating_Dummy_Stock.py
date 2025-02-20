@@ -1,31 +1,59 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import qfin as qf  # Run locally where qfin is installed
+import matplotlib.ticker as mticker  # For proper Y-axis formatting
 
-# Define GBM Parameters with Correct Scaling
-S0 = 610  # Initial stock price (e.g., SPY)
-mu = 0.000001  # Realistic minute-level expected drift (~10% annual return)
-sigma = 0.005  # Realistic minute-level volatility (~15% annual volatility)
-T = 100  # Total simulation time (trading days)
-N = 390 * T  # Number of time steps (390 minutes/day * 10 days)
-dt = 1 / (252 * 390)  # Time step per minute (252 trading days per year)
+# 📌 Step 1: Set GBM Parameters
+S0 = 610.00  # Initial stock price
+mu_annual = 0.10  # Annual drift (10%)
+sigma_annual = 0.1592  # Annual volatility (15.92%)
 
-# Creating a dummy stock that mimics SPY for 10 trading days
-path = qf.simulations.GeometricBrownianMotion(S0, mu, sigma, dt, T)
+N_minutes_per_day = 390  # Trading minutes per day (9:30 AM - 4:00 PM)
+N = N_minutes_per_day  # Total steps (minutes) for one day
 
-# Creating timestamps for 10 trading days (minute-by-minute)
-timestamps = pd.date_range(start='2023-02-20 09:30', periods=len(path.simulated_path), freq='min')
+# Convert annual drift and volatility to per-minute scale
+mu_per_min = mu_annual / (252 * 390)  # Drift per minute
 
-# Convert to DataFrame
-stock_df = pd.DataFrame({'Timestamp': timestamps, 'Stock_Price': path.simulated_path})
+# ✅ Adjusted Volatility Scaling (Fix)
+sigma_per_min = sigma_annual / np.sqrt(252)  # Convert to daily volatility
+sigma_per_min = sigma_per_min  # Base volatility, will scale dynamically during the open period
 
-# Plot the fixed GBM simulation
+dt = 1 / (252 * 390)  # Time step per minute
+
+# 📌 Step 2: Generate Trading Timestamps for One Day
+trading_day = pd.Timestamp("2023-02-20")  # Fixed single day
+timestamps = pd.date_range(start=trading_day.replace(hour=9, minute=30), periods=N_minutes_per_day, freq="min")  # ✅ FIXED WARNING
+
+# 📌 Step 3: Generate GBM Stock Price Path for One Day
+np.random.seed(42)  # For reproducibility
+dW = np.random.normal(0, 1, N)  # Standard normal random increments
+
+# Modify volatility based on the time of day (first 2 hours more volatile)
+volatility_factor = np.ones(N)  # Default volatility scaling (1 for normal)
+
+# Increase volatility during the first 2 hours (120 minutes)
+volatility_factor[:120] = 2  # Double volatility during the open period
+
+# Compute stock price path using GBM formula with modified volatility factor
+S = S0 * np.exp(np.cumsum((mu_per_min - 0.5 * sigma_per_min**2) * dt + (sigma_per_min * volatility_factor * np.sqrt(dt)) * dW))
+
+# 📌 Step 4: Create DataFrame and Store Results
+stock_df = pd.DataFrame({'Timestamp': timestamps, 'Stock_Price': S})
+
+# 📌 Step 5: Plot the Simulated Stock Prices for One Day
 plt.figure(figsize=(12, 5))
-plt.plot(stock_df['Timestamp'], stock_df['Stock_Price'], label='Simulated Stock Price', color='blue')
-plt.title('Simulated Stock Price Over 10 Trading Days (Realistic Movement)')
-plt.xlabel('Date')
-plt.xticks(rotation=45)
-plt.ylabel('Stock Price')
+plt.plot(stock_df['Timestamp'], stock_df['Stock_Price'], label="Simulated Stock Price", color="blue")
+plt.title("Simulated Intraday Stock Price (1 Trading Day) with Increased Volatility in Open Period")
+plt.xlabel("Time")
+plt.xticks(stock_df['Time'][::60], [t.strftime("%H:%M") for t in stock_df['Time'][::60]], rotation=45)
+plt.ylabel("Stock Price")
+
+# 🔹 Fix Y-Axis Formatting (No Scientific Notation)
+plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter('%.2f'))
+
 plt.legend()
 plt.show()
+
+# 📌 Step 6: Display First 10 Rows of the Data
+print(f"Number of timestamps generated: {len(stock_df)}")  # Should be 390
+print(stock_df.head(10))  # Show first 10 rows
