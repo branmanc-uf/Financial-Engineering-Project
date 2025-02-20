@@ -90,3 +90,5 @@ if daily_data:
     print(first_day_df.head(15))  # Print first 15 rows
 else:
     print("❌ No data available.")
+
+daily_dataframes.head(5)
