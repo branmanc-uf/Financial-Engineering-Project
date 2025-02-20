@@ -1,12 +1,6 @@
 import yfinance as yf
 import pandas as pd
 
-#Andres comment
-# 1. VScode
-# 2. Python
-# 3. Git
-# 5. Git extensions for VSCode
-#test deez nuts in yo moufS
 def fetch_data(stock="SPY", interval="1m", period="5d"):
     """
     Fetches 1-minute historical stock data for the last 5 trading days.
