@@ -83,3 +83,53 @@ if daily_data:
     print(first_day_df.head(15))  # Print first 15 rows
 else:
     print("❌ No data available.")
+
+def fetch_premarket_data(stock="SPY", period="5d"):
+    """
+    Fetches premarket high and low for the last 5 trading days.
+    Returns a dictionary with dates as keys and a tuple (premarket_high, premarket_low) as values.
+    """
+    print(f"📈 Fetching premarket data for {stock} over the past {period}.")
+
+    # Fetch data from Yahoo Finance
+    data = yf.download(
+        tickers=stock,
+        period=period,
+        interval="1m",
+        group_by="column",
+        auto_adjust=True,
+        prepost=True,  # Include pre/post market hours
+        threads=True
+    )
+
+    if data.empty:
+        print("❌ No data fetched. Check ticker, period, or interval.")
+        return {}
+# Convert timestamps from UTC to New York time (instead of localizing)
+    data.index = data.index.tz_convert('America/New_York')
+
+    # Ensure we have at least 5 unique trading days
+    unique_days = data.index.normalize().unique()
+    if len(unique_days) < 5:
+        print(f"⚠️ Warning: Only {len(unique_days)} trading days detected instead of 5.")
+
+    # Create a dictionary to hold premarket high and low for each trading day
+    premarket_data = {}
+
+    for date in unique_days:
+        # Extract premarket data (4:00 AM - 9:30 AM)
+        premarket_window = data.between_time("04:00", "09:30").loc[date.strftime('%Y-%m-%d')]
+
+        if premarket_window.empty:
+            print(f"⚠️ Premarket data skipped for {date} (missing data).")
+            continue
+
+        # Calculate premarket high and low
+        premarket_high = premarket_window["High"].max()
+        premarket_low = premarket_window["Low"].min()
+
+        premarket_data[date] = (premarket_high, premarket_low)
+
+        print(f"📊 Premarket for {date}: High = {premarket_high}, Low = {premarket_low}")
+
+    return premarket_data
