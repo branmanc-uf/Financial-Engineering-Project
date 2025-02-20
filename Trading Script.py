@@ -18,9 +18,17 @@ def calculate_orb(df):
     open_range = df.between_time('09:30', '10:00')
     print("Open range data:\n", open_range.head())
 
+    # Check if 'High' and 'Low' columns exist
+    if 'High' not in open_range.columns or 'Low' not in open_range.columns:
+        print("Error: 'High' or 'Low' columns are missing in the open range data.")
+        return df
+
     if open_range.empty:
         print("Warning: No data available for the first 30 minutes of trading.")
         return df  # Returning without setting ORB_High/ORB_Low if no data is available
+
+    # Debugging: print open_range data
+    print("Open range data:\n", open_range)
 
     orb_high = open_range['High'].max()
     orb_low = open_range['Low'].min()
