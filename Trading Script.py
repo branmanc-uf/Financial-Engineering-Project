@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-import numpy as np
+import numpy as nppip
 import matplotlib.pyplot as plt
 
 # Import the fetch_data function from fetching_yfinance_data.py
@@ -37,8 +37,12 @@ def determine_orb_levels(daily_data):
         orb_low = orb_window["Low"].min()    # Min low in first 15 minutes
 
         # Fix misalignment issue (remove "Ticker" label if present)
-        df["ORB_High"] = orb_high.values[0] if isinstance(orb_high, pd.Series) else orb_high
-        df["ORB_Low"] = orb_low.values[0] if isinstance(orb_low, pd.Series) else orb_low
+        # df["ORB_High"] = orb_high.values[0] if isinstance(orb_high, pd.Series) else orb_high
+        # df["ORB_Low"] = orb_low.values[0] if isinstance(orb_low, pd.Series) else orb_low
+        df["ORB_High"] = orb_high
+        df["ORB_Low"] = orb_low
+        # Print ORB levels for debugging
+
 
         print(f"📊 ORB for {date}: High = {df['ORB_High'].iloc[0]}, Low = {df['ORB_Low'].iloc[0]}")
 
@@ -49,6 +53,7 @@ def generate_signals(df):
     Generate buy/sell signals based on ORB breakout levels.
     """
     required_columns = ['Close', 'ORB_High', 'ORB_Low']
+    
     if df.empty or any(col not in df.columns for col in required_columns):
         print("❌ ORB levels missing. Cannot generate signals.")
         df['Signal'] = 0
@@ -56,10 +61,15 @@ def generate_signals(df):
 
     df = df.copy()  # Prevent chained assignment warnings
 
-    # Fill forward ORB values to avoid NaNs (fix deprecated method warning)
+    # 🔹 Fix: Fill forward ORB values to match index alignment
     df['ORB_High'] = df['ORB_High'].ffill()
     df['ORB_Low'] = df['ORB_Low'].ffill()
 
+    # 🔹 Fix: Explicitly align before comparisons
+    df['Close'], df['ORB_High'] = df['Close'].align(df['ORB_High'], axis=0, copy=False)
+    df['Close'], df['ORB_Low'] = df['Close'].align(df['ORB_Low'], axis=0, copy=False)
+
+    # Generate buy/sell signals
     df['Signal'] = 0
     df.loc[(df['Close'] > df['ORB_High']) & (df['Close'].shift(1) <= df['ORB_High']), 'Signal'] = 1
     df.loc[(df['Close'] < df['ORB_Low']) & (df['Close'].shift(1) >= df['ORB_Low']), 'Signal'] = -1
