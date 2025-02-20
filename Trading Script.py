@@ -49,7 +49,7 @@ def calculate_orb(df):
 
     print(f"ORB_High: {orb_high}, \n ORB_Low: {orb_low}")
     
-    # Fill the ORB values for the rest of the day
+    # Fill the ORB values for the rest of the day <- we have big error here dawg
     df['ORB_High'] = orb_high
     df['ORB_Low'] = orb_low
     
