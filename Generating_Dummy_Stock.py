@@ -7,7 +7,7 @@ import qfin as qf  # Run locally where qfin is installed
 S0 = 610  # Initial stock price (e.g., SPY)
 mu = 0.000001  # Realistic minute-level expected drift (~10% annual return)
 sigma = 0.005  # Realistic minute-level volatility (~15% annual volatility)
-T = 10000  # Total simulation time (10 trading days)
+T = 100  # Total simulation time (trading days)
 N = 390 * T  # Number of time steps (390 minutes/day * 10 days)
 dt = 1 / (252 * 390)  # Time step per minute (252 trading days per year)
 
