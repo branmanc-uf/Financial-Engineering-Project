@@ -89,7 +89,7 @@ def simulate_stock(days, S0=610.00, mu_annual=0.10, sigma_annual=0.1592):
         S0 = S_market[-1]
 
     return stock_df
-
+'''
 # Generate Fake Stock Data for 5 Days
 simulated_data = simulate_stock(1)
 
@@ -132,3 +132,4 @@ plt.xticks(rotation=45)
 plt.legend()
 plt.grid(True)
 plt.show()
+'''
