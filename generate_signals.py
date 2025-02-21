@@ -1,5 +1,5 @@
 import pandas as pd
-#from Gen_SPY_With_Indicators.py import simulate_stock  # Importing simulation function
+from Gen_SPY_With_Indicators import simulate_stock  # Importing simulation function
 
 def generate_signals(df):
     """ Generates trade signals based on ORB, VWAP, 8EMA, PM High/Low, and Yest High/Low """
@@ -39,7 +39,7 @@ def generate_signals(df):
     return df
 
 # Simulate Stock Data for 5 Days
-simulated_data = simulate_stock(5)
+simulated_data = simulate_stock(1)
 
 # Apply Signal Generation
 simulated_data = generate_signals(simulated_data)
