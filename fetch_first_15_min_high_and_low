@@ -1,0 +1,28 @@
+import pandas as pd
+
+def calculate_orb(df):
+    # Ensure the DataFrame is sorted by time
+    df = df.sort_values(by='time')
+
+    # Filter the first 15 minutes of data
+    first_15_min = df[df['time'] <= df['time'].min() + pd.Timedelta(minutes=15)]
+
+    # Calculate the high and low of the first 15 minutes
+    orb_high = first_15_min['high'].max()
+    orb_low = first_15_min['low'].min()
+
+    return orb_high, orb_low
+
+# Example usage with a dummy DataFrame
+data = {
+    'time': pd.date_range(start='2023-01-01 09:30:00', periods=30, freq='1T'),
+    'high': [100 + i for i in range(30)],
+    'low': [90 + i for i in range(30)],
+    'open': [95 + i for i in range(30)],
+    'close': [97 + i for i in range(30)]
+}
+
+df = pd.DataFrame(data)
+
+orb_high, orb_low = calculate_orb(df)
+print(f"ORB High: {orb_high}, ORB Low: {orb_low}")
