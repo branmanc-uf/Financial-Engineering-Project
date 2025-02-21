@@ -49,6 +49,3 @@ simulated_data = generate_signals(simulated_data)
 
 # Print any part of the simulated data that contains BUY CALL or BUY PUT signals
 print(simulated_data[simulated_data['Signal'].isin(['BUY CALL', 'BUY PUT', 'STRONG BUY CALL', 'STRONG BUY PUT'])])
-
-
-
