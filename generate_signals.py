@@ -23,12 +23,15 @@ def generate_signals(df):
     ] = 'BUY PUT'
 
     # Boost Call Confidence if PM High or Yesterday's High is broken
+    
     df.loc[
         (df['Signal'] == 'BUY CALL') & 
         ((df['Close'] > df['PM_High']) | (df['Close'] > df['Yest_High'])),
         'Signal'
     ] = 'STRONG BUY CALL'
+    
 
+    
     # Boost Put Confidence if PM Low or Yesterday's Low is broken
     df.loc[
         (df['Signal'] == 'BUY PUT') & 
@@ -39,12 +42,13 @@ def generate_signals(df):
     return df
 
 # Simulate Stock Data for 5 Days
-simulated_data = simulate_stock(1)
+simulated_data = simulate_stock(2)
 
 # Apply Signal Generation
 simulated_data = generate_signals(simulated_data)
 
-# Print the head of the simulated data
-print(simulated_data.head())
+# Print any part of the simulated data that contains BUY CALL or BUY PUT signals
+print(simulated_data[simulated_data['Signal'].isin(['BUY CALL', 'BUY PUT', 'STRONG BUY CALL', 'STRONG BUY PUT'])])
+
 
 
