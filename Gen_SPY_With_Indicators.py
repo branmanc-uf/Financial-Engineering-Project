@@ -10,6 +10,8 @@ def simulate_stock(days, S0=610.00, mu_annual=0.10, sigma_annual=0.1592):
     
     Returns:
         stock_df (DataFrame): A DataFrame containing the simulated stock price movements with indicators.
+        prev_day_high (float): The high price of the day before the testing period.
+        prev_day_low (float): The low price of the day before the testing period.
     """
     N_pre_market_minutes = 330  # Pre-market minutes (4:00 AM - 9:30 AM)
     N_market_minutes = 390  # Regular trading minutes (9:30 AM - 4:00 PM)
@@ -23,6 +25,43 @@ def simulate_stock(days, S0=610.00, mu_annual=0.10, sigma_annual=0.1592):
 
     prev_day_high, prev_day_low = None, None
 
+    # Generate data for the day before the testing period
+    pre_market_timestamps = pd.date_range(
+        start=trading_day.replace(hour=4, minute=0), periods=N_pre_market_minutes, freq="min"
+    ) - pd.Timedelta(days=1)
+
+    market_timestamps = pd.date_range(
+        start=trading_day.replace(hour=9, minute=30), periods=N_market_minutes, freq="min"
+    ) - pd.Timedelta(days=1)
+
+    dW_pre_market = np.random.normal(0, 1, N_pre_market_minutes)
+    dW_market = np.random.normal(0, 1, N_market_minutes)
+
+    volatility_factor_pre_market = np.ones(N_pre_market_minutes) * 2.5  
+    volatility_factor_market = np.ones(N_market_minutes)
+    volatility_factor_market[:120] = 2  
+
+    S_pre_market = S0 * np.exp(np.cumsum((mu_per_min - 0.5 * sigma_per_min**2) * dt +
+                                         (sigma_per_min * volatility_factor_pre_market * np.sqrt(dt)) * dW_pre_market))
+
+    S_market = S_pre_market[-1] * np.exp(np.cumsum((mu_per_min - 0.5 * sigma_per_min**2) * dt +
+                                                   (sigma_per_min * volatility_factor_market * np.sqrt(dt)) * dW_market))
+
+    volume_pre_market = np.random.randint(100, 5000, size=N_pre_market_minutes)
+    volume_market = np.random.randint(5000, 20000, size=N_market_minutes)
+
+    pre_market_df = pd.DataFrame({'Timestamp': pre_market_timestamps, 'Close': S_pre_market, 
+                                  'Volume': volume_pre_market, 'Session': 'PM', 'Day': 0})
+
+    market_df = pd.DataFrame({'Timestamp': market_timestamps, 'Close': S_market, 
+                              'Volume': volume_market, 'Session': 'Regular Market', 'Day': 0})
+
+    day_df = pd.concat([pre_market_df, market_df])
+
+    prev_day_high = day_df['Close'].max()
+    prev_day_low = day_df['Close'].min()
+
+    # Generate data for the testing period
     for day in range(days):
         pre_market_timestamps = pd.date_range(
             start=trading_day.replace(hour=4, minute=0), periods=N_pre_market_minutes, freq="min"
@@ -88,7 +127,7 @@ def simulate_stock(days, S0=610.00, mu_annual=0.10, sigma_annual=0.1592):
         stock_df = pd.concat([stock_df, day_df], ignore_index=True)
         S0 = S_market[-1]
 
-    return stock_df
+    return stock_df, prev_day_high, prev_day_low
 '''
 # Generate Fake Stock Data for 5 Days
 simulated_data = simulate_stock(1)
