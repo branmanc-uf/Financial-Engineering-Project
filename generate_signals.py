@@ -44,4 +44,7 @@ simulated_data = simulate_stock(1)
 # Apply Signal Generation
 simulated_data = generate_signals(simulated_data)
 
+# Print the head of the simulated data
+print(simulated_data.head())
+
 
