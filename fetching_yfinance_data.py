@@ -133,6 +133,7 @@ def fetch_premarket_data(stock="SPY", period="5d"):
         print(f"📊 Premarket for {date}: High = {premarket_high}, Low = {premarket_low}")
 
     return premarket_data
+
 # Example usage
 if __name__ == "__main__":
     daily_data = fetch_data("SPY")
@@ -148,7 +149,12 @@ if __name__ == "__main__":
         print("❌ No data available.")
 
     if premarket_data:
+        print("\n📊 Premarket Data:")
+        print(f"{'Date':<12} {'High':<10} {'Low':<10}")
+        print("-" * 32)
         for date, (high, low) in premarket_data.items():
-            print(f"📅 {date}: Premarket High = {high}, Premarket Low = {low}")
+            high_value = high if not isinstance(high, pd.Series) else high.iloc[0]
+            low_value = low if not isinstance(low, pd.Series) else low.iloc[0]
+            print(f"{date.strftime('%Y-%m-%d'):<12} {high_value:<10.2f} {low_value:<10.2f}")
     else:
         print("❌ No premarket data available.")
