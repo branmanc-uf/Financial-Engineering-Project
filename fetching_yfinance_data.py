@@ -133,3 +133,22 @@ def fetch_premarket_data(stock="SPY", period="5d"):
         print(f"📊 Premarket for {date}: High = {premarket_high}, Low = {premarket_low}")
 
     return premarket_data
+# Example usage
+if __name__ == "__main__":
+    daily_data = fetch_data("SPY")
+    premarket_data = fetch_premarket_data("SPY")
+
+    if daily_data:
+        first_date = list(daily_data.keys())[0]  # Extract the first date key
+        first_day_df = daily_data[first_date]    # Get the DataFrame for the first date
+
+        print(f"\n📅 First Trading Day: {first_date}")
+        print(first_day_df.head(15))  # Print first 15 rows
+    else:
+        print("❌ No data available.")
+
+    if premarket_data:
+        for date, (high, low) in premarket_data.items():
+            print(f"📅 {date}: Premarket High = {high}, Premarket Low = {low}")
+    else:
+        print("❌ No premarket data available.")

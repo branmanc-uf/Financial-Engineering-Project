@@ -4,7 +4,7 @@ import numpy as nppip
 import matplotlib.pyplot as plt
 
 # Import the fetch_data function from fetching_yfinance_data.py
-from fetching_yfinance_data import fetch_data
+from fetching_yfinance_data import fetch_data, fetch_premarket_data
 
 def calculate_indicators(df):
     """
@@ -101,9 +101,14 @@ def main():
 
     # Fetch Data (now returns a dictionary of DataFrames, one per trading day)
     daily_data = fetch_data(stock)
+    premarket_data = fetch_premarket_data(stock)
 
     if not daily_data:
         print("❌ No data fetched. Exiting program.")
+        return
+    
+    if not premarket_data:
+        print("❌ No premarket data fetched. Exiting program.")
         return
 
     # Apply ORB Calculation
@@ -113,6 +118,8 @@ def main():
         print(f"\n🔍 Processing Data for {date}:")
         df = calculate_indicators(df)
         df = generate_signals(df)
+        premarket_high, premarket_low = premarket_data.get(date, (None, None))
+        print(f"📅 {date}: Premarket High = {premarket_high}, Premarket Low = {premarket_low}")
         print(df[['Close', 'VWAP', 'EMA', 'ORB_High', 'ORB_Low', 'Signal']].head(20))
         plot_signals(df, stock, date)
 
