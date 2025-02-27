@@ -91,6 +91,7 @@ def fetch_premarket_data(stock="SPY", period="5d"):
     # Convert timestamps from UTC to New York time (instead of localizing)
     data.index = data.index.tz_convert('America/New_York')
 
+<<<<<<< Updated upstream
     # Ensure we have at least 5 unique trading days
     unique_days = data.index.normalize().unique()
     if len(unique_days) < 5:
@@ -139,3 +140,6 @@ if __name__ == "__main__":
             print(f"{date.strftime('%Y-%m-%d'):<12} {high_value:<10.2f} {low_value:<10.2f}")
     else:
         print("❌ No premarket data available.")
+=======
+daily_dataframes.head(5)
+>>>>>>> Stashed changes
