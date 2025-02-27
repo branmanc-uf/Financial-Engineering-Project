@@ -66,24 +66,6 @@ def fetch_data(stock="SPY", interval="1m", period="5d"):
 
     return daily_dataframes
 
-
-#first_date = list(daily_data.keys())[0]  # Extract the first date key
-#first_day_df = daily_data[first_date]
-#print(f"\n📅 First Trading Day: {first_date}")
-#print(first_day_df.head(20))
-# Fetch data
-daily_data = fetch_data("SPY")
-
-# Check if data was returned
-if daily_data:
-    first_date = list(daily_data.keys())[0]  # Extract the first date key
-    first_day_df = daily_data[first_date]    # Get the DataFrame for the first date
-
-    print(f"\n📅 First Trading Day: {first_date}")
-    print(first_day_df.head(15))  # Print first 15 rows
-else:
-    print("❌ No data available.")
-
 def fetch_premarket_data(stock="SPY", period="5d"):
     """
     Fetches premarket high and low for the last 5 trading days.
@@ -105,7 +87,8 @@ def fetch_premarket_data(stock="SPY", period="5d"):
     if data.empty:
         print("❌ No data fetched. Check ticker, period, or interval.")
         return {}
-# Convert timestamps from UTC to New York time (instead of localizing)
+
+    # Convert timestamps from UTC to New York time (instead of localizing)
     data.index = data.index.tz_convert('America/New_York')
 
     # Ensure we have at least 5 unique trading days
@@ -129,8 +112,6 @@ def fetch_premarket_data(stock="SPY", period="5d"):
         premarket_low = premarket_window["Low"].min()
 
         premarket_data[date] = (premarket_high, premarket_low)
-
-        print(f"📊 Premarket for {date}: High = {premarket_high}, Low = {premarket_low}")
 
     return premarket_data
 
