@@ -4,10 +4,11 @@ from Gen_SPY_With_Indicators import simulate_stock  # Importing simulation funct
 import matplotlib.pyplot as plt  # Importing matplotlib for plotting
 import matplotlib.ticker as mticker  # For proper Y-axis formatting
 
-def generate_signals(df):
+def generate_signals(df, stop_loss_pct=0.02):
     """ Generates trade signals based on ORB, VWAP, 8EMA, PM High/Low, and Yest High/Low """
 
     df['Signal'] = ''
+    df['Stop_Loss'] = np.nan  # Initialize Stop_Loss column
 
     # Buy Call: Price breaks ORB High & supported by 8EMA & VWAP
     df.loc[
@@ -26,21 +27,22 @@ def generate_signals(df):
     ] = 'BUY PUT'
 
     # Boost Call Confidence if PM High or Yesterday's High is broken
-    
     df.loc[
         (df['Signal'] == 'BUY CALL') & 
         ((df['Close'] > df['PM_High']) | (df['Close'] > df['Yest_High'])),
         'Signal'
     ] = 'STRONG BUY CALL'
-    
 
-    
     # Boost Put Confidence if PM Low or Yesterday's Low is broken
     df.loc[
         (df['Signal'] == 'BUY PUT') & 
         ((df['Close'] < df['PM_Low']) | (df['Close'] < df['Yest_Low'])),
         'Signal'
     ] = 'STRONG BUY PUT'
+
+    # Add stop loss levels
+    df.loc[df['Signal'].isin(['BUY CALL', 'STRONG BUY CALL']), 'Stop_Loss'] = df['Close'] * (1 - stop_loss_pct)
+    df.loc[df['Signal'].isin(['BUY PUT', 'STRONG BUY PUT']), 'Stop_Loss'] = df['Close'] * (1 + stop_loss_pct)
 
     return df
 
