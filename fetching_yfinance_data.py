@@ -66,13 +66,59 @@ def fetch_data(stock="SPY", interval="1m", period="5d"):
 
     return daily_dataframes
 
+def fetch_premarket_data(stock="SPY", period="5d"):
+    """
+    Fetches premarket high and low for the last 5 trading days.
+    Returns a dictionary with dates as keys and a tuple (premarket_high, premarket_low) as values.
+    """
+    print(f"📈 Fetching premarket data for {stock} over the past {period}.")
 
-#first_date = list(daily_data.keys())[0]  # Extract the first date key
-#first_day_df = daily_data[first_date]
-#print(f"\n📅 First Trading Day: {first_date}")
-#print(first_day_df.head(20))
-# Fetch data
-daily_data = fetch_data("SPY")
+    # Fetch data from Yahoo Finance
+    data = yf.download(
+        tickers=stock,
+        period=period,
+        interval="1m",
+        group_by="column",
+        auto_adjust=True,
+        prepost=True,  # Include pre/post market hours
+        threads=True
+    )
+
+    if data.empty:
+        print("❌ No data fetched. Check ticker, period, or interval.")
+        return {}
+
+    # Convert timestamps from UTC to New York time (instead of localizing)
+    data.index = data.index.tz_convert('America/New_York')
+
+    # Ensure we have at least 5 unique trading days
+    unique_days = data.index.normalize().unique()
+    if len(unique_days) < 5:
+        print(f"⚠️ Warning: Only {len(unique_days)} trading days detected instead of 5.")
+
+    # Create a dictionary to hold premarket high and low for each trading day
+    premarket_data = {}
+
+    for date in unique_days:
+        # Extract premarket data (4:00 AM - 9:30 AM)
+        premarket_window = data.between_time("04:00", "09:30").loc[date.strftime('%Y-%m-%d')]
+
+        if premarket_window.empty:
+            print(f"⚠️ Premarket data skipped for {date} (missing data).")
+            continue
+
+        # Calculate premarket high and low
+        premarket_high = premarket_window["High"].max()
+        premarket_low = premarket_window["Low"].min()
+
+        premarket_data[date] = (premarket_high, premarket_low)
+
+    return premarket_data
+
+# Example usage
+if __name__ == "__main__":
+    daily_data = fetch_data("SPY")
+    premarket_data = fetch_premarket_data("SPY")
 
 # Check if data was returned
 if daily_data:
@@ -84,4 +130,13 @@ if daily_data:
 else:
     print("❌ No data available.")
 
-daily_dataframes.head(5)
+if premarket_data:
+    print("\n📊 Premarket Data:")
+    print(f"{'Date':<12} {'High':<10} {'Low':<10}")
+    print("-" * 32)
+    for date, (high, low) in premarket_data.items():
+        high_value = high if not isinstance(high, pd.Series) else high.iloc[0]
+        low_value = low if not isinstance(low, pd.Series) else low.iloc[0]
+        print(f"{date.strftime('%Y-%m-%d'):<12} {high_value:<10.2f} {low_value:<10.2f}")
+else:
+    print("❌ No premarket data available.")
