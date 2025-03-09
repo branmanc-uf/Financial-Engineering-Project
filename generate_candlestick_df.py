@@ -1,7 +1,7 @@
 import pandas as pd
 from Gen_SPY_With_Indicators import simulate_stock
 
-def generate_candlestick(simulated_data):
+def generate_candlestick(simulated_data, interval):
     # Simulate stock data
     df = simulated_data
 
@@ -15,8 +15,8 @@ def generate_candlestick(simulated_data):
     timestamp_list = []
 
     # Iterate through the dataframe in chunks of 5
-    for i in range(0, len(df), 30):
-        chunk = df.iloc[i:i+30]
+    for i in range(0, len(df), interval):
+        chunk = df.iloc[i:i+interval]
         if not chunk.empty:
             open_list.append(chunk['Close'].iloc[0])
             close_list.append(chunk['Close'].iloc[-1])
@@ -43,6 +43,6 @@ def generate_candlestick(simulated_data):
 if __name__ == "__main__":
     days = 2  # Specify the number of days for simulation
     fake_stock, nothingOne, nothingTwo = simulate_stock(days)
-    candlestick_df = generate_candlestick(fake_stock)
+    candlestick_df = generate_candlestick(fake_stock, 30)
     print("this is the candlestick df")
     print(candlestick_df)
