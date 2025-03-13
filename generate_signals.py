@@ -144,3 +144,42 @@ update_plot(None)
 # Print any part of the simulated data that contains BUY CALL or BUY PUT signals during Regular Market session
 print(simulated_data[(simulated_data['Signal'].isin(['BUY CALL', 'BUY PUT', 'STRONG BUY CALL', 'STRONG BUY PUT'])) & 
                      (simulated_data['Session'] == 'Regular Market')])
+
+def create_portfolio(df, initial_budget=10000):
+    """ Creates a portfolio that buys next day ITM contracts using 10% of the portfolio budget """
+
+    portfolio = []
+    budget = initial_budget
+
+    for day in df['Day'].unique():
+        day_data = df[df['Day'] == day]
+        signals = day_data[(day_data['Signal'].isin(['BUY CALL', 'STRONG BUY CALL', 'BUY PUT', 'STRONG BUY PUT'])) & 
+                            (day_data['Session'] == 'Regular Market')]
+
+        if not signals.empty:
+            for _, signal in signals.iterrows():
+                if budget >= 0.1 * initial_budget:
+                    # Determine contract price based on signal
+                    if 'CALL' in signal['Signal']:
+                        contract_price = signal['Close'] * 0.1  # Example: 10% of the closing price for CALL
+                    else:
+                        contract_price = signal['Close'] * 0.1  # Example: 10% of the closing price for PUT
+
+                    contracts_to_buy = int((0.1 * budget) / contract_price)
+                    portfolio.append({
+                        'Day': day,
+                        'Timestamp': signal['Timestamp'],
+                        'Signal': signal['Signal'],
+                        'Contracts': contracts_to_buy,
+                        'Contract_Price': contract_price,
+                        'Total_Cost': contracts_to_buy * contract_price
+                    })
+                    budget -= contracts_to_buy * contract_price
+
+    return portfolio
+
+# Create portfolio
+portfolio = create_portfolio(simulated_data)
+
+# Print portfolio
+print(portfolio)
