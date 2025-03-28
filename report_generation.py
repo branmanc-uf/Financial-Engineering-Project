@@ -1,3 +1,6 @@
+#ALL HERE ARE PENDING TESTING
+#author: Antonio de Guzman
+
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -51,5 +54,31 @@ def generate_excel_report(symbol, start_date, end_date, output_file):
     wb.save(output_file)
     print(f"Excel report generated: {output_file}")
 
+def generate_text_report(symbol, start_date, end_date, output_file):
+    """
+    Generates a text file summarizing the results of the strategy test.
+
+    Parameters:
+    - symbol: Stock ticker (e.g., "SPY").
+    - start_date: Start date for backtest (YYYY-MM-DD).
+    - end_date: End date for backtest (YYYY-MM-DD).
+    - output_file: Path to save the text report.
+    """
+    # Run the strategy test and get performance metrics
+    performance_metrics = test_strategy(symbol, start_date, end_date)
+
+    if performance_metrics is None:
+        print("⚠️ No data available or strategy test failed.")
+        return
+
+    # Write performance metrics to a text file
+    with open(output_file, "w") as file:
+        file.write(f"Strategy Test Results for {symbol} ({start_date} to {end_date})\n")
+        file.write("=" * 50 + "\n")
+        for key, value in performance_metrics.items():
+            file.write(f"{key}: {value}\n")
+    print(f"Text report generated: {output_file}")
+
 # Example usage
 generate_excel_report("SPY", "2023-01-01", "2023-01-31", "strategy_report.xlsx")
+generate_text_report("SPY", "2023-01-01", "2023-01-31", "strategy_report.txt")
