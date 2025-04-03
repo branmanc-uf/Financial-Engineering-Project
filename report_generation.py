@@ -36,7 +36,7 @@ def generate_excel_report(symbol, start_date, end_date, output_file):
         ws.append([key, value])
 
     # Generate and save the candlestick chart
-    from presentation_dashboard import plot_candlestick_with_indicators
+    from generate_candlestick_df import plot_candlestick_with_indicators
     simulated_data = pd.DataFrame()  # Replace with actual simulated data
     candlestick_data = pd.DataFrame()  # Replace with actual candlestick data
     plot_candlestick_with_indicators(candlestick_data, simulated_data)
