@@ -155,5 +155,3 @@ def fetch_multiple_days(symbol: str, start_date: str, end_date: str):
 
     return combined_df
 
-# Example usage: Fetch data for a week (Feb 20 - Feb 27, 2025)
-df_week = fetch_multiple_days("SPY", "2025-02-20", "2025-02-28")
