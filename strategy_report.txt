@@ -1,0 +1,7 @@
+Strategy Test Results for SPY (2023-05-01 to 2025-04-04)
+==================================================
+Sharpe Ratio: 0.01
+Max Drawdown: -1.15
+Win Rate: 0.0
+Final Portfolio Value: 10118.81
+Final Strategy Return: 101.19

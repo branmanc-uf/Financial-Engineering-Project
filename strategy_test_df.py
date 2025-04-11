@@ -281,25 +281,3 @@ def identify_breakout_levels(df, open_range_min=15):
         breakout_levels.append(group)
 
     return pd.concat(breakout_levels)
-
-df = pd.read_csv('df_2022_2024.csv', parse_dates=['datetime'])
-df['datetime'] = pd.to_datetime(df['datetime'], utc=True).dt.tz_convert('America/New_York')
-df
-
-
-results = test_strategy_from_df(
-    df,
-    initial_capital=20000,
-    risk_per_trade=0.20,
-    open_range_min=15,
-    stop_loss_pct=0.10,
-    take_profit_pct=0.20,
-    expiration_days=1,
-    sigma=0.20,
-    max_trades=1
-)
-
-print("Backtest Results:")
-for k, v in results.items():
-    if k not in ['DataFrame', 'Trade Log']:  
-        print(f"{k}: {v}")

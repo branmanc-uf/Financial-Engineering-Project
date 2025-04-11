@@ -1,0 +1,2 @@
+initial_capital,risk_per_trade,open_range_min,stop_loss_pct,take_profit_pct,expiration_days,sigma,max_trades,max_minutes_in_trade,max_daily_loss_pct,max_portfolio_cap,max_drawdown_pct,max_consecutive_losses,trailing_stop_pct,decay_threshold,Sharpe Ratio,Max Drawdown,Win Rate,Final Portfolio Value,Final Strategy Return,Total Trades
+25000,0.2,20,0.15,0.2,3,0.2,3,60,0.15,4,0.7,7,0.25,0.03,0.12,-75.0,50.05,100000,100.0,959

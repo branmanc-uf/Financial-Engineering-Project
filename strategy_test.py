@@ -1,5 +1,7 @@
-from Stock_API import fetch_multiple_days
 from getting_options import black_scholes_dataframe
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 def test_strategy(symbol, start_date, end_date, 
                   initial_capital=10000, risk_per_trade=0.02, 
@@ -25,7 +27,8 @@ def test_strategy(symbol, start_date, end_date,
     """
 
     # Fetch stock data
-    df = fetch_multiple_days(symbol, start_date, end_date)
+    df = pd.read_csv('df_2023_2025.csv', parse_dates=['datetime'])
+    df['datetime'] = pd.to_datetime(df['datetime'], utc=True).dt.tz_convert('America/New_York')
     
     if df is None or df.empty:
         print("⚠️ No data available for the given date range.")
@@ -120,8 +123,9 @@ def identify_breakout_levels(df, open_range_min=15):
     - DataFrame with breakout levels.
     """
     
-    df = df.copy()
-    df['datetime'] = pd.to_datetime(df['datetime'])  # Ensure datetime format
+    df = pd.read_csv('df_2023_2025.csv', parse_dates=['datetime'])
+    df['datetime'] = pd.to_datetime(df['datetime'], utc=True).dt.tz_convert('America/New_York')
+    df["Volume"] = pd.read_csv('df_2023_2025_volumes.csv', usecols=['volume'])["volume"]
 
     # Define market open time
     market_open = pd.to_datetime('09:30:00').time()  

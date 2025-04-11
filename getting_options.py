@@ -1,8 +1,5 @@
-
 import numpy as np
 from scipy.stats import norm
-from Stock_API import fetch_stock_data, main
-
 def black_scholes_dataframe(df, strike_offset=5, r=0.05, sigma=0.20, expiration_days=1):
     """
     Adds Black-Scholes option pricing to a DataFrame.
@@ -43,7 +40,3 @@ def black_scholes_dataframe(df, strike_offset=5, r=0.05, sigma=0.20, expiration_
     df['Rho'] = df['Strike_Price'] * T * np.exp(-r * T) * norm.cdf(df['d2'])
 
     return df
-
-df = main('SPY', '2025-02-28')
-
-black_scholes_dataframe(df)
