@@ -148,9 +148,12 @@ def test_strategy_from_df(df,
                     reason = 'Time/Price Decay'
 
                 trade_profit = contracts * (current_price - entry_price) * 100
+
+                '''
                 if abs(trade_profit) > 0.5 * portfolio:
                     print(f"Large trade: {trade_profit:.2f} at {now}")
-
+                '''
+                
                 portfolio += trade_profit
                 daily_portfolio_high = max(daily_portfolio_high, portfolio)
                 df.iloc[i, df.columns.get_loc('Realized PnL')] = float(trade_profit)
@@ -199,10 +202,10 @@ def test_strategy_from_df(df,
     rolling_max = df['Cumulative Strategy Return'].cummax()
     drawdown = (df['Cumulative Strategy Return'] / rolling_max) - 1
     max_drawdown = drawdown.min()
-
+    
+    '''
     reason_summary = pd.DataFrame(trade_log).groupby("Reason")['PnL'].agg(['count', 'mean', 'sum'])
     print("\nExit Reason Summary:\n", reason_summary)
-
     plt.figure(figsize=(12, 6))
     plt.plot(df.index, df['Cumulative Market Return'], label="Market Return", linestyle="dashed")
     plt.plot(df.index, df['Cumulative Strategy Return'], label="Strategy Return", color='green')
@@ -217,7 +220,7 @@ def test_strategy_from_df(df,
     plt.xlabel("Profit/Loss per Trade")
     plt.ylabel("Frequency")
     plt.show()
-
+    '''
     total_trades = len(trade_log)
 
     return {
