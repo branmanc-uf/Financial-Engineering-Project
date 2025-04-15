@@ -75,13 +75,7 @@ def generate_reports(symbol, df, output_file, strategy_params):
     # Save the workbook
     wb.save(output_file)
     print(f"Excel report generated: {output_file}")
-
-    # Write performance metrics to a text file
-    text_output_file = output_file.replace(".xlsx", ".txt")
-    with open(text_output_file, "w") as file:
-        file.write(f"Strategy Test Results for {symbol}\n")
-        file.write("=" * 50 + "\n")
-        for key, value in metrics.items():
+    
     # Write performance metrics to a text file
     text_output_file = output_file.replace(".xlsx", ".txt")
     with open(text_output_file, "w") as file:
