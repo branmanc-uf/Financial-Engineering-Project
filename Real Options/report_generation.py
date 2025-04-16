@@ -53,7 +53,7 @@ def generate_reports(symbol, df, output_file, strategy_params, image_paths=None)
                 img = Image(image_path)
                 img.anchor = f"A{current_row}"  # Place the image starting at column A
                 ws.add_image(img)
-                current_row += 70  # Leave space for the image (adjust as needed)
+                current_row += 100  # Leave space for the image (adjust as needed)
             except Exception as e:
                 print(f"⚠️ Could not add image {image_path}: {e}")
 
