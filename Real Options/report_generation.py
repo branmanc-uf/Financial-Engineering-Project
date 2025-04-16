@@ -53,7 +53,7 @@ def generate_reports(symbol, df, output_file, strategy_params, image_paths=None)
                 img = Image(image_path)
                 img.anchor = f"A{current_row}"  # Place the image starting at column A
                 ws.add_image(img)
-                current_row += 20  # Leave space for the image (adjust as needed)
+                current_row += 70  # Leave space for the image (adjust as needed)
             except Exception as e:
                 print(f"⚠️ Could not add image {image_path}: {e}")
 
@@ -71,19 +71,6 @@ def generate_reports(symbol, df, output_file, strategy_params, image_paths=None)
 
     for row in dataframe_to_rows(trade_log_export, index=False, header=True):
         ws_trades.append(row)
-    '''
-    # Generate and save the candlestick chart
-    plot_candlestick_with_indicators(candlestick_data, retrieved_data)
-    chart_path = "candlestick_chart.png"
-    plt.savefig(chart_path, bbox_inches="tight")
-    plt.close()
-
-    # Embed the chart in the Excel report
-    ws_chart = wb.create_sheet(title="Candlestick Chart")
-    img = Image(chart_path)
-    img.anchor = "A1"
-    ws_chart.add_image(img)
-    '''
 
     # Save the workbook
     wb.save(output_file)
