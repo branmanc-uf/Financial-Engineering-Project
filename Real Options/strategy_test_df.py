@@ -205,19 +205,24 @@ def test_strategy_from_df(df,
     
     reason_summary = pd.DataFrame(trade_log).groupby("Reason")['PnL'].agg(['count', 'mean', 'sum'])
     print("\nExit Reason Summary:\n", reason_summary)
+
+    # Plot and save the return graph
     plt.figure(figsize=(12, 6))
     plt.plot(df.index, df['Cumulative Market Return'], label="Market Return", linestyle="dashed")
     plt.plot(df.index, df['Cumulative Strategy Return'], label="Strategy Return", color='green')
     plt.legend()
     date_range = f"{df.index[0].date()} to {df.index[-1].date()}"
     plt.title(f"Strategy Performance ({date_range})\nSharpe: {sharpe_ratio:.2f}, Max DD: {max_drawdown:.2%}")
+    plt.savefig("Return_Graph.png", bbox_inches="tight")
     plt.show()
 
+    # Plot and save the PnL distribution graph
     plt.figure(figsize=(8, 4))
     pd.Series([t['PnL'] for t in trade_log]).hist(bins=100)
     plt.title("PnL Distribution")
     plt.xlabel("Profit/Loss per Trade")
     plt.ylabel("Frequency")
+    plt.savefig("PnL_Distribution_Graph.png", bbox_inches="tight")
     plt.show()
     
     total_trades = len(trade_log)

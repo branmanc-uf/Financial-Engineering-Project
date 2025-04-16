@@ -10,15 +10,16 @@ import pandas as pd
 from datetime import datetime, timedelta
 from getting_options import black_scholes_dataframe
 
-def generate_reports(symbol, df, output_file, strategy_params):
+def generate_reports(symbol, df, output_file, strategy_params, image_paths=None):
     """
-    Generates an Excel report with strategy performance metrics and a candlestick chart using the new strategy function.
+    Generates an Excel report with strategy performance metrics, a trade log, and optional images.
 
     Parameters:
     - symbol: Stock ticker (e.g., "SPY").
     - df: DataFrame containing stock data.
     - output_file: Path to save the Excel report.
     - strategy_params: Dictionary of parameters to pass to test_strategy_from_df.
+    - image_paths: List of file paths to images to embed in the report.
     """
 
     performance_metrics = test_strategy_from_df(
@@ -43,6 +44,18 @@ def generate_reports(symbol, df, output_file, strategy_params):
     ws.append(["Metric", "Value"])
     for key, value in metrics.items():
         ws.append([key, value])
+
+    # Add images to the "Performance Metrics" sheet
+    if image_paths:
+        current_row = ws.max_row + 2  # Leave a blank row after the metrics
+        for image_path in image_paths:
+            try:
+                img = Image(image_path)
+                img.anchor = f"A{current_row}"  # Place the image starting at column A
+                ws.add_image(img)
+                current_row += 20  # Leave space for the image (adjust as needed)
+            except Exception as e:
+                print(f"⚠️ Could not add image {image_path}: {e}")
 
     # Write trade log to a new sheet
     ws_trades = wb.create_sheet(title="Trade Log")
