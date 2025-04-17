@@ -10,7 +10,7 @@ import time  # Needed for adding delay
 from datetime import datetime, timedelta
 
 # API key (Replace with your actual API key)
-API_KEY = "N5TPWLXWaGR0IN3_ttrmMROH_q9b2yBi"
+API_KEY = ""
 
 def fetch_stock_data(symbol: str, date: str):
     """
