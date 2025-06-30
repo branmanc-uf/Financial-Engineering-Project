@@ -9,6 +9,7 @@ CONTACT
 For any questions about the project, feel free to reach out to the following team members:
 Brandon Mancilla: brandon.mancilla@ufl.edu
 Antonio de Guzman: antonio.deguzman@ufl.edu
+Vincent Lin: lin.vincent@ufl.edu
 
 PRESENTATION and POSTER
 The presentation and poster that we made for the project can be found in the main repository! The poster is highly condensed and was presented at the Spring 2025 UF ISE Undergraduate Symposium. The team unveiled the presentation, which fully fleshes out the timeline, scope, objectives, and accomplishments of the project, to faculty members Dr. Siddig and Dr. Amini on April 17th, 2025.
